@@ -158,8 +158,8 @@ static int _modbus_rtu_send_msg_pre(uint8_t *req, int req_length)
 
     /* According to the MODBUS specs (p. 14), the low order byte of the CRC comes
      * first in the RTU message */
+    req[req_length++] = crc >> 8; // & 0x00FF;
     req[req_length++] = crc & 0x00FF;
-    req[req_length++] = crc >> 8;
 
     return req_length;
 }
@@ -377,7 +377,7 @@ static int _modbus_rtu_check_integrity(modbus_t *ctx, uint8_t *msg,
     }
 
     crc_calculated = crc16(msg, msg_length - 2);
-    crc_received = (msg[msg_length - 1] << 8) | msg[msg_length - 2];
+    crc_received = msg[msg_length - 1] | (msg[msg_length - 2] << 8);
 
     /* Check CRC of msg */
     if (crc_calculated == crc_received) {
